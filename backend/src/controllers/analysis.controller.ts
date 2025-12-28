@@ -3,6 +3,7 @@ import fs from 'fs';
 import { Analysis } from '../models';
 import { CustomError } from '../middleware/errorHandler';
 import logger from '../utils/logger';
+import CodeAnalyzer from '../services/analyzer';
 
 export const uploadAndAnalyze = async (
   req: Request,
@@ -17,14 +18,14 @@ export const uploadAndAnalyze = async (
     // Read file content
     const codeContent = fs.readFileSync(req.file.path, 'utf-8');
 
-    // Create analysis record
+    // Create analysis record with pending status
     const analysis = new Analysis({
       fileName: req.file.originalname,
       filePath: req.file.path,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       codeContent,
-      status: 'pending',
+      status: 'processing',
       ruleBasedResults: {
         violations: [],
         score: 100,
@@ -34,7 +35,34 @@ export const uploadAndAnalyze = async (
 
     await analysis.save();
 
-    logger.info(`Analysis created: ${analysis._id}`);
+    logger.info(`Analysis created: ${analysis._id}, starting analysis...`);
+
+    // Run static analysis
+    try {
+      const analyzer = new CodeAnalyzer();
+      const analysisResult = await analyzer.analyze(codeContent, req.file.originalname);
+
+      // Update analysis with results
+      analysis.ruleBasedResults = {
+        violations: analysisResult.violations.map((v) => ({
+          rule: v.rule,
+          severity: v.severity,
+          message: v.message,
+          line: v.line,
+          column: v.column,
+        })),
+        score: analysisResult.score,
+        totalViolations: analysisResult.totalViolations,
+      };
+      analysis.status = 'completed';
+      await analysis.save();
+
+      logger.info(`Analysis completed for ${analysis._id}: ${analysisResult.totalViolations} violations found`);
+    } catch (analysisError: any) {
+      logger.error(`Analysis failed for ${analysis._id}:`, analysisError);
+      analysis.status = 'failed';
+      await analysis.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -42,7 +70,8 @@ export const uploadAndAnalyze = async (
         id: analysis._id,
         fileName: analysis.fileName,
         status: analysis.status,
-        message: 'File uploaded successfully. Analysis will be processed.',
+        ruleBasedResults: analysis.ruleBasedResults,
+        message: 'File uploaded and analyzed successfully.',
       },
     });
   } catch (error) {
