@@ -22,7 +22,7 @@ export const errorHandler = (
   err: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _: NextFunction
 ): void => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
@@ -46,7 +46,7 @@ export const errorHandler = (
   });
 };
 
-export const notFoundHandler = (req: Request, res: Response, next: NextFunction): void => {
+export const notFoundHandler = (req: Request, _: Response, next: NextFunction): void => {
   const error = new CustomError(`Route ${req.originalUrl} not found`, 404);
   next(error);
 };

@@ -14,6 +14,12 @@ export const env = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
   HUGGINGFACE_API_KEY: process.env.HUGGINGFACE_API_KEY || '',
   
+  // LLM Configuration
+  LLM_ENABLED: process.env.LLM_ENABLED !== 'false', // Default to true
+  LLM_MODEL: process.env.LLM_MODEL || 'meta-llama/Meta-Llama-3.1-8B-Instruct',
+  LLM_MAX_TOKENS: parseInt(process.env.LLM_MAX_TOKENS || '2000', 10),
+  LLM_TEMPERATURE: parseFloat(process.env.LLM_TEMPERATURE || '0.7'),
+  
   // CORS
   FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173',
   

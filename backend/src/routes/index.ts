@@ -4,7 +4,7 @@ import analysisRoutes from './analysis.routes';
 const router = Router();
 
 // Health check
-router.get('/health', (req, res) => {
+router.get('/health', (_, res) => {
   res.json({ 
     status: 'ok', 
     message: 'Server is running',

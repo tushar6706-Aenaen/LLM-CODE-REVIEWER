@@ -17,7 +17,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging
-app.use((req, res, next) => {
+app.use((req: any, _: any, next: any) => {
   logger.info(`${req.method} ${req.path}`);
   next();
 });

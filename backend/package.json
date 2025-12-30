@@ -17,10 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/parser": "^7.28.5",
-    "@babel/traverse": "^7.28.5",
-    "@babel/types": "^7.28.5",
+    "@huggingface/inference": "^4.13.5",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
